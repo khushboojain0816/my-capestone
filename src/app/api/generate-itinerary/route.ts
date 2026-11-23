@@ -11,26 +11,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const client = new OpenAI({ apiKey });
+  try {
+    const client = new OpenAI({ apiKey });
 
-  const body: ItineraryRequest = await req.json();
-  const { destination, days, purpose } = body;
+    const body: ItineraryRequest = await req.json();
+    const { destination, days, purpose } = body;
 
-  if (!destination || !days || !purpose) {
-    return NextResponse.json(
-      { error: "destination, days, and purpose are required" },
-      { status: 400 }
-    );
-  }
+    if (!destination || !days || !purpose) {
+      return NextResponse.json(
+        { error: "destination, days, and purpose are required" },
+        { status: 400 }
+      );
+    }
 
-  if (days < 1 || days > 30) {
-    return NextResponse.json(
-      { error: "days must be between 1 and 30" },
-      { status: 400 }
-    );
-  }
+    if (days < 1 || days > 30) {
+      return NextResponse.json(
+        { error: "days must be between 1 and 30" },
+        { status: 400 }
+      );
+    }
 
-  const prompt = `Create a detailed ${days}-day travel itinerary for ${destination}.
+    const prompt = `Create a detailed ${days}-day travel itinerary for ${destination}.
 Purpose of trip: ${purpose}
 
 Return ONLY a valid JSON object (no markdown, no code fences) in this exact structure:
@@ -50,7 +51,6 @@ Return ONLY a valid JSON object (no markdown, no code fences) in this exact stru
 
 Create exactly ${days} day plan objects. Make the itinerary specific, practical, and tailored to the purpose: ${purpose}.`;
 
-  try {
     const response = await client.chat.completions.create({
       model: "gpt-4o",
       response_format: { type: "json_object" },
@@ -87,7 +87,8 @@ Create exactly ${days} day plan objects. Make the itinerary specific, practical,
       if (err.status === 401) {
         message = "Invalid OpenAI API key. Check your .env.local file.";
       } else if (err.status === 429 || err.code === "insufficient_quota") {
-        message = "No OpenAI API credits. Add credits at platform.openai.com/billing — a ChatGPT Plus subscription does NOT include API credits.";
+        message =
+          "No OpenAI API credits. Add credits at platform.openai.com/billing — a ChatGPT Plus subscription does NOT include API credits.";
       } else if (typeof err.message === "string" && err.message) {
         message = err.message;
       }
