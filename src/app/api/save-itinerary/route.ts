@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import { Itinerary } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
+  let supabase;
+  try {
+    supabase = getSupabase();
+  } catch {
+    return NextResponse.json({ error: "Supabase not configured." }, { status: 503 });
+  }
+
   const itinerary: Itinerary = await req.json();
 
   const { data, error } = await supabase
