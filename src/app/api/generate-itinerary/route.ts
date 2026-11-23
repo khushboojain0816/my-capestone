@@ -72,11 +72,21 @@ Create exactly ${days} day plan objects. Make the itinerary specific, practical,
     };
 
     return NextResponse.json(itinerary);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error generating itinerary:", error);
-    return NextResponse.json(
-      { error: "Failed to generate itinerary. Please try again." },
-      { status: 500 }
-    );
+
+    let message = "Failed to generate itinerary.";
+    if (error && typeof error === "object") {
+      const err = error as { status?: number; message?: string; code?: string };
+      if (err.status === 401) {
+        message = "Invalid OpenAI API key. Check your .env.local file.";
+      } else if (err.status === 429 || err.code === "insufficient_quota") {
+        message = "No OpenAI API credits. Add credits at platform.openai.com/billing — a ChatGPT Plus subscription does NOT include API credits.";
+      } else if (typeof err.message === "string" && err.message) {
+        message = err.message;
+      }
+    }
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
