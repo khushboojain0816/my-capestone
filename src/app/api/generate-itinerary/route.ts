@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { ItineraryRequest, Itinerary } from "@/lib/types";
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function POST(req: NextRequest) {
@@ -45,22 +45,23 @@ Return ONLY a valid JSON object (no markdown, no code fences) in this exact stru
 Create exactly ${days} day plan objects. Make the itinerary specific, practical, and tailored to the purpose: ${purpose}.`;
 
   try {
-    const stream = await client.messages.stream({
-      model: "claude-opus-5-5",
-      max_tokens: 64000,
-      system:
-        "You are an expert travel planner. You create detailed, practical, and engaging travel itineraries. Always respond with valid JSON only — no explanations, no markdown, no code fences.",
-      messages: [{ role: "user", content: prompt }],
+    const response = await client.chat.completions.create({
+      model: "gpt-4o",
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert travel planner. You create detailed, practical, and engaging travel itineraries. Always respond with valid JSON only — no explanations, no markdown, no code fences.",
+        },
+        { role: "user", content: prompt },
+      ],
     });
 
-    const message = await stream.finalMessage();
+    const text = response.choices[0]?.message?.content;
+    if (!text) throw new Error("No content in response");
 
-    const textBlock = message.content.find((b) => b.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
-      throw new Error("No text content in response");
-    }
-
-    const parsed = JSON.parse(textBlock.text);
+    const parsed = JSON.parse(text);
 
     const itinerary: Itinerary = {
       destination,

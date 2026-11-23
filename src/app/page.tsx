@@ -65,7 +65,7 @@ export default function Home() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          Powered by Claude AI &bull; Stored with Supabase
+          Powered by OpenAI GPT-4o &bull; Stored with Supabase
         </p>
       </div>
     </main>
