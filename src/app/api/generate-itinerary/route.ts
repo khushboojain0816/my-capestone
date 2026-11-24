@@ -41,15 +41,27 @@ Return ONLY a valid JSON object (no markdown, no code fences) in this exact stru
     {
       "day": 1,
       "title": "Day theme/title",
-      "morning": "Morning activities (9am-12pm)",
-      "afternoon": "Afternoon activities (12pm-6pm)",
-      "evening": "Evening activities (6pm onwards)",
-      "tips": "Practical tip for the day (transport, booking, cost, etc.)"
+      "activities": [
+        {
+          "time": "9:00 AM",
+          "duration": "1.5 hours",
+          "place": "Exact name of the specific place or attraction",
+          "description": "What to do, see, eat, or experience here. Include entrance fees, what not to miss, and any booking advice.",
+          "mapQuery": "Exact Place Name, Area, City, Country — optimized for Google Maps search"
+        }
+      ],
+      "tips": "One practical tip for the day covering transport, local customs, payment, or booking."
     }
   ]
 }
 
-Create exactly ${days} day plan objects. Make the itinerary specific, practical, and tailored to the purpose: ${purpose}.`;
+Rules:
+- Each day must have 6-8 activities scheduled from roughly 8:00 AM to 10:00 PM.
+- Times must be realistic — include travel time between locations (add a travel entry if needed).
+- "place" must be the real, specific name of a venue (not generic like "a local restaurant" — use actual names).
+- "mapQuery" must be precise enough to find the exact spot on Google Maps.
+- "duration" should reflect realistic visit time including queues.
+- Create exactly ${days} day plan objects, tailored to the purpose: ${purpose}.`;
 
     const response = await client.chat.completions.create({
       model: "gpt-4o",

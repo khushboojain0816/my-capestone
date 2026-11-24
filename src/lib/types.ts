@@ -4,12 +4,18 @@ export interface ItineraryRequest {
   purpose: string;
 }
 
+export interface Activity {
+  time: string;
+  duration: string;
+  place: string;
+  description: string;
+  mapQuery: string;
+}
+
 export interface DayPlan {
   day: number;
   title: string;
-  morning: string;
-  afternoon: string;
-  evening: string;
+  activities: Activity[];
   tips: string;
 }
 
